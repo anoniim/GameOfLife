@@ -127,7 +127,7 @@ class WorldView(context: Context, attrs: AttributeSet) : View(context, attrs) {
 
     fun getDisplaySize(): Point {
         val size = Point()
-        display.getSize(size)
+        display.getRealSize(size)
         return size
     }
 }

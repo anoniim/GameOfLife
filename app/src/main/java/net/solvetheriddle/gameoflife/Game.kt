@@ -4,7 +4,9 @@ import android.os.SystemClock
 import android.util.Log
 import androidx.lifecycle.LiveData
 
-class Game(minVerticalCellCount: Int = DEFAULT_SIZE, minHorizontalCellCount: Int = DEFAULT_SIZE)
+class Game(minVerticalCellCount: Int = DEFAULT_SIZE,
+           minHorizontalCellCount: Int = DEFAULT_SIZE,
+           private val gameSpeed: GameSpeed = GameSpeed())
     : LiveData<Array<IntArray>>() {
 
     private val LOG_TAG = this::class.java.simpleName
@@ -12,7 +14,6 @@ class Game(minVerticalCellCount: Int = DEFAULT_SIZE, minHorizontalCellCount: Int
     companion object {
         private const val MIN_SIZE = 5
         private const val DEFAULT_SIZE = 500
-        private const val DEFAULT_STEP_MILLIS = 500L
     }
 
     enum class GameState {
@@ -24,11 +25,10 @@ class Game(minVerticalCellCount: Int = DEFAULT_SIZE, minHorizontalCellCount: Int
     }
 
     private var gameState = GameState.PAUSED
-    set(state) {
-        field = state
-        Log.d(LOG_TAG, "State = ${state.name}")
-    }
-    private var turnStepMillis = DEFAULT_STEP_MILLIS
+        set(state) {
+            field = state
+            Log.d(LOG_TAG, "State = ${state.name}")
+        }
 
     var worldState: Array<IntArray> = emptyWorldState(minVerticalCellCount, minHorizontalCellCount)
         set(newState) {
@@ -37,24 +37,24 @@ class Game(minVerticalCellCount: Int = DEFAULT_SIZE, minHorizontalCellCount: Int
         }
     private var worldStateObserver: Game.WorldStateObserver? = null
 
-    fun toggle() {
+    fun togglePlay() {
         if (gameState == GameState.RUNNING) pause() else run()
     }
 
-    fun run() {
+    private fun run() {
         gameState = GameState.RUNNING
         while (gameState == GameState.RUNNING) {
             nextTurn()
-            SystemClock.sleep(turnStepMillis)
+            SystemClock.sleep(gameSpeed.millis.toLong())
         }
     }
 
-    fun pause() {
+    private fun pause() {
         gameState = GameState.PAUSED
     }
 
-    fun setStepMillis(stepMillis: Long) {
-        turnStepMillis = stepMillis
+    fun cycleSpeed(): Int {
+        return gameSpeed.cycleUp()
     }
 
     override fun onActive() {

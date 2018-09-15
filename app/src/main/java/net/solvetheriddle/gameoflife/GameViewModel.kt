@@ -24,10 +24,14 @@ class GameViewModel : ViewModel() {
     }
 
     fun togglePlay() {
-        gameLiveData.toggle()
+        gameLiveData.togglePlay()
     }
 
-    fun setSpeed(speed: Long) {
-        gameLiveData.setStepMillis(speed)
+    fun cycleSpeed() {
+        gameLiveData.cycleSpeed()
+    }
+
+    fun cycleZoom() {
+
     }
 }

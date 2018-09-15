@@ -6,6 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/world_background"
+    android:fitsSystemWindows="false"
     tools:context=".GameActivity">
 
     <!-- The primary full-screen view. This can be replaced with whatever view
@@ -18,32 +19,59 @@
         android:gravity="center"
         android:keepScreenOn="true"/>
 
-    <!-- This FrameLayout insets its children based on system windows using
-         android:fitsSystemWindows. -->
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:fitsSystemWindows="false">
+        android:fitsSystemWindows="true">
 
-        <LinearLayout
-            android:id="@+id/game_controls"
-            style="?metaButtonBarStyle"
+        <net.solvetheriddle.gameoflife.GameControlsWidget
+            android:id="@+id/controls_view"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="bottom|center_horizontal"
-            android:orientation="horizontal"
-            android:gravity="bottom|end"
-            tools:ignore="UselessParent">
+            android:layout_height="match_parent">
 
             <com.google.android.material.floatingactionbutton.FloatingActionButton
                 android:id="@+id/play_button"
+                android:layout_width="@dimen/primary_control_button_size"
+                android:layout_height="@dimen/primary_control_button_size"
+                android:layout_margin="@dimen/fab_margin"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintRight_toRightOf="parent"
+                app:srcCompat="@android:drawable/ic_media_play"/>
+
+            <LinearLayout
+                android:id="@+id/extra_controls_view"
+                style="?metaButtonBarStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="bottom|end"
-                android:layout_margin="@dimen/fab_margin"
-                app:srcCompat="@android:drawable/ic_dialog_email"/>
+                android:layout_gravity="bottom|center_horizontal"
+                android:gravity="bottom|end"
+                android:orientation="vertical"
+                android:paddingBottom="64dp"
+                android:animateLayoutChanges="true"
+                app:layout_constraintBottom_toBottomOf="@+id/play_button"
+                app:layout_constraintLeft_toLeftOf="@id/play_button"
+                app:layout_constraintRight_toRightOf="@+id/play_button"
+                tools:ignore="UselessParent">
 
-        </LinearLayout>
+                <com.google.android.material.floatingactionbutton.FloatingActionButton
+                    android:id="@+id/zoom_button"
+                    android:layout_width="@dimen/secondary_control_button_size"
+                    android:layout_height="@dimen/secondary_control_button_size"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginBottom="@dimen/fab_margin"
+                    app:srcCompat="@android:drawable/ic_menu_zoom"/>
+
+                <com.google.android.material.floatingactionbutton.FloatingActionButton
+                    android:id="@+id/speed_button"
+                    android:layout_width="@dimen/secondary_control_button_size"
+                    android:layout_height="@dimen/secondary_control_button_size"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginBottom="@dimen/fab_margin"
+                    app:srcCompat="@android:drawable/ic_media_ff"/>
+
+            </LinearLayout>
+
+        </net.solvetheriddle.gameoflife.GameControlsWidget>
     </FrameLayout>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
