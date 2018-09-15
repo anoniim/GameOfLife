@@ -8,6 +8,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import kotlinx.android.synthetic.main.activity_game.*
+import kotlinx.android.synthetic.main.activity_game.view.*
 import kotlin.concurrent.thread
 
 /**
@@ -15,35 +16,34 @@ import kotlin.concurrent.thread
  * status bar and navigation/system bar) with user interaction.
  */
 class GameActivity : AppCompatActivity() {
-    private val mHideHandler = Handler()
-    private val mHidePart2Runnable = Runnable {
-        // Delayed removal of status and navigation bar
-        world_view.systemUiVisibility =
-                View.SYSTEM_UI_FLAG_LOW_PROFILE or
-                View.SYSTEM_UI_FLAG_FULLSCREEN or
-                View.SYSTEM_UI_FLAG_LAYOUT_STABLE or
-                View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY or
-                View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION or
-                View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-    }
-    private val mShowPart2Runnable = Runnable {
-        // Delayed display of UI elements
-        game_controls.visibility = View.VISIBLE
-    }
-    private var mVisible: Boolean = false
-    private val mHideRunnable = Runnable { hide() }
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         setContentView(R.layout.activity_game)
 
-        mVisible = true
-
         val viewModel = ViewModelProviders.of(this).get(GameViewModel::class.java)
 
-        world_view.setOnClickListener { toggle() }
+        initWorldView(viewModel)
+        initGameControls(viewModel)
+
+        // World state observer
+        viewModel.gameLiveData.observe(this, Observer {
+            runOnUiThread {
+                world_view.setState(it)
+            }
+        })
+    }
+
+    override fun onPostCreate(savedInstanceState: Bundle?) {
+        super.onPostCreate(savedInstanceState)
+        delayedHide()
+    }
+
+    private fun initWorldView(viewModel: GameViewModel) {
+        world_view.setOnClickListener {
+            toggleSystemUiVisibility()
+        }
         world_view.setGridVisibility(false)
         world_view.viewTreeObserver.addOnGlobalLayoutListener(object : ViewTreeObserver.OnGlobalLayoutListener {
             override fun onGlobalLayout() {
@@ -54,75 +54,71 @@ class GameActivity : AppCompatActivity() {
                 world_view.viewTreeObserver.removeOnGlobalLayoutListener(this)
             }
         })
+    }
 
-        play_button.setOnClickListener {
+    private fun initGameControls(viewModel: GameViewModel) {
+        controls_view.play_button.setOnClickListener {
             thread { viewModel.togglePlay() }
         }
-        play_button.setOnLongClickListener {
-            showMenu()
-            true
+        controls_view.play_button.setOnLongClickListener {
+            controls_view.toggleExtraControlsVisibility()
         }
-
-        // World state observer
-        viewModel.gameLiveData.observe(this, Observer {
-            runOnUiThread {
-                world_view.setState(it)
-            }
-        })
-    }
-
-    private fun showMenu() {
-
-    }
-
-    override fun onPostCreate(savedInstanceState: Bundle?) {
-        super.onPostCreate(savedInstanceState)
-
-        // Trigger the initial hide() shortly after the activity has been
-        // created, to briefly hint to the user that UI controls
-        // are available.
-//        delayedHide(100)
-    }
-
-    private fun toggle() {
-        if (mVisible) {
-            hide()
-        } else {
-            show()
+        controls_view.zoom_button.setOnClickListener {
+            viewModel.cycleZoom()
         }
-
-//        game.nextTurn()
+        controls_view.speed_button.setOnClickListener {
+            viewModel.cycleSpeed()
+        }
     }
 
-    private fun hide() {
-        // Hide UI first
-        game_controls.visibility = View.GONE
-        mVisible = false
+    private var systemUiShown: Boolean = true
+    private val mHideHandler = Handler()
+    private val mDelayedHideRunnable = Runnable { hideUi() }
+    private val mHidePart2Runnable = Runnable { hideSystemUi() }
+    private val mShowPart2Runnable = Runnable { controls_view.show() }
 
+    private fun toggleSystemUiVisibility() {
+        if (systemUiShown) hideUi() else showUi()
+    }
+
+    private fun delayedHide() {
+        mHideHandler.removeCallbacks(mDelayedHideRunnable)
+        mHideHandler.postDelayed(mDelayedHideRunnable, INITIAL_HIDE_DELAY)
+    }
+
+    private fun hideUi() {
+        controls_view.hide()
         // Schedule a runnable to remove the status and navigation bar after a delay
         mHideHandler.removeCallbacks(mShowPart2Runnable)
-        mHideHandler.postDelayed(mHidePart2Runnable, UI_ANIMATION_DELAY.toLong())
+        mHideHandler.postDelayed({ hideSystemUi() }, UI_ANIMATION_DELAY)
+        systemUiShown = false
     }
 
-    private fun show() {
-        // Show the system bar
-        world_view.systemUiVisibility =
-                View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or
-                View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-        mVisible = true
+    private fun hideSystemUi() {
+        // Delayed removal of status and navigation bar
+        window.decorView.systemUiVisibility =
+                View.SYSTEM_UI_FLAG_LOW_PROFILE or
+                View.SYSTEM_UI_FLAG_FULLSCREEN or
+                View.SYSTEM_UI_FLAG_LAYOUT_STABLE or
+                View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY or
+                View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION or
+                View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+    }
 
+    private fun showUi() {
+        showSystemUi()
         // Schedule a runnable to display UI elements after a delay
         mHideHandler.removeCallbacks(mHidePart2Runnable)
-        mHideHandler.postDelayed(mShowPart2Runnable, UI_ANIMATION_DELAY.toLong())
+        mHideHandler.postDelayed(mShowPart2Runnable, UI_ANIMATION_DELAY)
+        systemUiShown = true
+
     }
 
-    /**
-     * Schedules a call to hide() in [delayMillis], canceling any
-     * previously scheduled calls.
-     */
-    private fun delayedHide(delayMillis: Int) {
-        mHideHandler.removeCallbacks(mHideRunnable)
-        mHideHandler.postDelayed(mHideRunnable, delayMillis.toLong())
+    private fun showSystemUi() {
+        // Show the system bar
+        window.decorView.systemUiVisibility =
+                View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or
+                View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
     }
 
     companion object {
@@ -142,6 +138,8 @@ class GameActivity : AppCompatActivity() {
          * Some older devices needs a small delay between UI widget updates
          * and a change of the status and navigation bar.
          */
-        private const val UI_ANIMATION_DELAY = 300
+        private const val UI_ANIMATION_DELAY = 300L
+
+        private const val INITIAL_HIDE_DELAY = 100L
     }
 }
