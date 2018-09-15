@@ -1,6 +1,8 @@
 package net.solvetheriddle.gameoflife
 
-data class GameSpeed(var millis: Int = MAX_STEP_MILLIS) {
+import androidx.lifecycle.LiveData
+
+data class GameSpeed(var millis: Int = MAX_STEP_MILLIS): LiveData<Int>() {
 
     companion object {
         private const val STEP_MILLIS: Int = 2

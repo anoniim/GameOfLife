@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.os.Handler
 import android.view.View
 import android.view.ViewTreeObserver
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
@@ -31,6 +32,11 @@ class GameActivity : AppCompatActivity() {
         viewModel.gameLiveData.observe(this, Observer {
             runOnUiThread {
                 world_view.setState(it)
+            }
+        })
+        viewModel.gameLiveData.gameSpeed.observe(this, Observer {
+            runOnUiThread {
+                Toast.makeText(this, "$it x", Toast.LENGTH_SHORT).show()
             }
         })
     }
