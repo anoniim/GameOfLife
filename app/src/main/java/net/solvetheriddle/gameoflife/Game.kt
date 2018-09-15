@@ -6,10 +6,10 @@ import androidx.lifecycle.LiveData
 
 class Game(minVerticalCellCount: Int = DEFAULT_SIZE,
            minHorizontalCellCount: Int = DEFAULT_SIZE,
-           private val gameSpeed: GameSpeed = GameSpeed())
+           val gameSpeed: GameSpeed = GameSpeed())
     : LiveData<Array<IntArray>>() {
 
-    private val LOG_TAG = this::class.java.simpleName
+    private val tag = this::class.java.simpleName
 
     companion object {
         private const val MIN_SIZE = 5
@@ -27,7 +27,7 @@ class Game(minVerticalCellCount: Int = DEFAULT_SIZE,
     private var gameState = GameState.PAUSED
         set(state) {
             field = state
-            Log.d(LOG_TAG, "State = ${state.name}")
+            Log.d(tag, "State = ${state.name}")
         }
 
     var worldState: Array<IntArray> = emptyWorldState(minVerticalCellCount, minHorizontalCellCount)
@@ -60,7 +60,7 @@ class Game(minVerticalCellCount: Int = DEFAULT_SIZE,
     override fun onActive() {
         worldStateObserver = object : WorldStateObserver {
             override fun onNextTurn(worldState: Array<IntArray>) {
-                Log.d(LOG_TAG, "Next turn posted")
+                Log.d(tag, "Next turn posted")
                 postValue(worldState)
             }
         }
