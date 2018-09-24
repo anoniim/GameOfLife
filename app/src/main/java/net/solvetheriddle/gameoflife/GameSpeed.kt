@@ -10,13 +10,13 @@ data class GameSpeed(var millis: Int = MAX_STEP_MILLIS): LiveData<Int>() {
         private const val MIN_STEP_MILIS: Int = 8
     }
 
-    fun cycleUp() : Int {
+    fun cycleUp() {
         if (millis >= MIN_STEP_MILIS) {
             millis /= STEP_MILLIS
         } else {
             millis = MAX_STEP_MILLIS
         }
-        return speedMultiplicator(millis)
+        value = speedMultiplicator(millis)
     }
 
     private fun speedMultiplicator(currentMillis: Int) = numberOfSteps - log2nlz(currentMillis) + 2
