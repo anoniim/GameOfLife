@@ -53,8 +53,8 @@ class Game(minVerticalCellCount: Int = DEFAULT_SIZE,
         gameState = GameState.PAUSED
     }
 
-    fun cycleSpeed(): Int {
-        return gameSpeed.cycleUp()
+    fun cycleSpeed() {
+        gameSpeed.cycleUp()
     }
 
     override fun onActive() {
