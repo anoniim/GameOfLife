@@ -2,6 +2,8 @@ package net.solvetheriddle.gameoflife
 
 import android.os.Bundle
 import android.os.Handler
+import android.util.Log
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewTreeObserver
 import android.widget.Toast
@@ -16,14 +18,24 @@ import kotlin.concurrent.thread
  * An example full-screen activity that shows and hides the system UI (i.e.
  * status bar and navigation/system bar) with user interaction.
  */
-class GameActivity : AppCompatActivity() {
+class GameActivity : AppCompatActivity(), GestureHelper.ClickListener {
+
+    enum class GameMode {
+        PLAY,
+        EDIT
+    }
+
+    private var gameMode: GameMode = GameConfig.DEFAULT_GAME_MODE
+
+    private val viewModel: GameViewModel
+        get() {
+            return ViewModelProviders.of(this).get(GameViewModel::class.java)
+        }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         setContentView(R.layout.activity_game)
-
-        val viewModel = ViewModelProviders.of(this).get(GameViewModel::class.java)
 
         initWorldView(viewModel)
         initGameControls(viewModel)
@@ -46,17 +58,39 @@ class GameActivity : AppCompatActivity() {
         delayedHide()
     }
 
-    private fun initWorldView(viewModel: GameViewModel) {
-        world_view.setOnClickListener {
-            toggleSystemUiVisibility()
+    override fun onSingleTap(e: MotionEvent) {
+//        viewModel.onSingleTap()
+        Log.wtf("marcel", "single")
+        toggleSystemUiVisibility(false)
+    }
+
+    override fun onDoubleTap(e: MotionEvent) {
+        // Toggle Game Mode
+        when (gameMode) {
+            GameMode.PLAY -> editMode()
+            GameMode.EDIT -> playMode()
         }
-        world_view.setGridVisibility(false)
+    }
+
+    private fun playMode() {
+        gameMode = GameMode.PLAY
+        showUi(false)
+        world_view.showGrid(false)
+        Toast.makeText(this, "PLAY", Toast.LENGTH_SHORT).show()
+    }
+
+    private fun editMode() {
+        gameMode = GameMode.EDIT
+        showUi(true)
+        world_view.showGrid(true)
+        Toast.makeText(this, "EDIT", Toast.LENGTH_SHORT).show()
+    }
+
+    private fun initWorldView(viewModel: GameViewModel) {
+        world_view.showGrid(gameMode == GameMode.EDIT)
         world_view.viewTreeObserver.addOnGlobalLayoutListener(object : ViewTreeObserver.OnGlobalLayoutListener {
             override fun onGlobalLayout() {
-                val displaySize = world_view.getDisplaySize()
-                world_view.setState(viewModel.initGame(
-                        world_view.getCellCount(displaySize.y),
-                        world_view.getCellCount(displaySize.x)))
+                world_view.setState(viewModel.initGame(world_view.getDisplaySize()))
                 world_view.viewTreeObserver.removeOnGlobalLayoutListener(this)
             }
         })
@@ -79,23 +113,20 @@ class GameActivity : AppCompatActivity() {
 
     private var systemUiShown: Boolean = true
     private val mHideHandler = Handler()
-    private val mDelayedHideRunnable = Runnable { hideUi() }
-    private val mHidePart2Runnable = Runnable { hideSystemUi() }
-    private val mShowPart2Runnable = Runnable { controls_view.show() }
 
-    private fun toggleSystemUiVisibility() {
-        if (systemUiShown) hideUi() else showUi()
+    private fun toggleSystemUiVisibility(expanded: Boolean) {
+        if (systemUiShown) hideUi() else showUi(expanded)
     }
 
     private fun delayedHide() {
-        mHideHandler.removeCallbacks(mDelayedHideRunnable)
-        mHideHandler.postDelayed(mDelayedHideRunnable, INITIAL_HIDE_DELAY)
+        mHideHandler.removeCallbacksAndMessages(null)
+        mHideHandler.postDelayed({ hideUi() }, INITIAL_HIDE_DELAY)
     }
 
     private fun hideUi() {
         controls_view.hide()
         // Schedule a runnable to remove the status and navigation bar after a delay
-        mHideHandler.removeCallbacks(mShowPart2Runnable)
+        mHideHandler.removeCallbacksAndMessages(null)
         mHideHandler.postDelayed({ hideSystemUi() }, UI_ANIMATION_DELAY)
         systemUiShown = false
     }
@@ -111,11 +142,11 @@ class GameActivity : AppCompatActivity() {
                 View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
     }
 
-    private fun showUi() {
+    private fun showUi(expanded: Boolean) {
         showSystemUi()
         // Schedule a runnable to display UI elements after a delay
-        mHideHandler.removeCallbacks(mHidePart2Runnable)
-        mHideHandler.postDelayed(mShowPart2Runnable, UI_ANIMATION_DELAY)
+        mHideHandler.removeCallbacksAndMessages(null)
+        mHideHandler.postDelayed({ controls_view.show(expanded) }, UI_ANIMATION_DELAY)
         systemUiShown = true
 
     }

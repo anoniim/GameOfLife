@@ -1,5 +1,6 @@
 package net.solvetheriddle.gameoflife
 
+import android.graphics.Point
 import androidx.lifecycle.ViewModel
 import java.util.*
 
@@ -7,10 +8,13 @@ class GameViewModel : ViewModel() {
 
     val gameLiveData = Game()
 
-    fun initGame(verticalCellCount: Int, horizontalCellCount: Int): Array<IntArray> {
+    /**
+     * Initializes Game with a world that fits in the given View
+     */
+    fun initGame(displaySize: Point): Array<IntArray> {
         val initState = getRandomState(
-                verticalCellCount,
-                horizontalCellCount)
+                displaySize.x / WorldConfig.MIN_CELL_SIZE,
+                displaySize.y / WorldConfig.MIN_CELL_SIZE)
         gameLiveData.worldState = initState
         return initState
     }
@@ -32,6 +36,14 @@ class GameViewModel : ViewModel() {
     }
 
     fun cycleZoom() {
+
+    }
+
+    fun onSingleTap() {
+
+    }
+
+    fun onDoubleTap() {
 
     }
 }
