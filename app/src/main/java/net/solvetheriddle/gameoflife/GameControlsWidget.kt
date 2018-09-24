@@ -16,11 +16,10 @@ class GameControlsWidget
                     attrs: AttributeSet? = null,
                     defStyleAttr: Int = 0) : ConstraintLayout(context, attrs, defStyleAttr) {
 
-    private var playButtonVisible: Boolean = true
     private var controlsVisible: Boolean = false
 
     internal fun toggleControlsVisibility() {
-        if (playButtonVisible) hide() else show()
+        if (controlsVisible) hide() else show(false)
     }
 
     internal fun toggleExtraControlsVisibility(): Boolean {
@@ -29,8 +28,8 @@ class GameControlsWidget
         return true
     }
 
-    private fun View.animateVisibility(currentlyVisible: Boolean) {
-        ObjectAnimator.ofFloat(this, "alpha", if (currentlyVisible) 0F else 1F)
+    private fun View.animateVisibility(toVisible: Boolean) {
+        ObjectAnimator.ofFloat(this, "alpha", if (toVisible) 1F else 2F)
                 .apply {
                     duration = UI_ANIMATION_SPEED
                     start()
@@ -40,25 +39,24 @@ class GameControlsWidget
                     override fun onAnimationCancel(p0: Animator?) {}
                     override fun onAnimationStart(p0: Animator?) {}
                     override fun onAnimationEnd(p0: Animator?) {
-                        visibility = if(currentlyVisible) View.GONE else View.VISIBLE
+                        visibility = if(toVisible) View.VISIBLE else View.GONE
                     }
                 })
     }
 
     @SuppressLint("RestrictedApi")
     fun hide() {
-        play_button.visibility = View.GONE
-        playButtonVisible = false
         controls_view.visibility = View.GONE
         controlsVisible = false
     }
 
     @SuppressLint("RestrictedApi")
-    fun show() {
-        play_button.visibility = View.VISIBLE
-        playButtonVisible = true
+    fun show(expanded: Boolean) {
         controls_view.visibility = View.VISIBLE
         controlsVisible = true
+        if (expanded) {
+            extra_controls_view.animateVisibility(true)
+        }
     }
 
     companion object {
