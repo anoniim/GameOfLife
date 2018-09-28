@@ -16,15 +16,17 @@ import java.lang.Math.nextUp
 import kotlin.math.max
 import kotlin.math.min
 
-class GestureHelper(val view: View, val content: RectF, val viewport: RectF, private val clickListener: ClickListener?) {
+class GestureHelper(
+        private val view: View,
+        private val content: RectF,
+        private val viewport: RectF,
+        private val model: WorldViewModel,
+        private val clickListener: ClickListener?) {
 
     interface ClickListener {
         fun onSingleTap(e: MotionEvent)
         fun onDoubleTap(e: MotionEvent)
     }
-
-    private var AUTO_ZOOM_AMOUNT = 0.2f
-    private var zoomRatio = 1f
 
     private val mScroller = OverScroller(view.context)
     private val mZoomer: Zoomer = Zoomer(view.context)
@@ -111,7 +113,6 @@ class GestureHelper(val view: View, val content: RectF, val viewport: RectF, pri
         }
     }
 
-
     ////////////////////////////////////////////////////////////////////////////////////////////////
     //
     //     Methods and objects related to gesture handling
@@ -142,7 +143,7 @@ class GestureHelper(val view: View, val content: RectF, val viewport: RectF, pri
             } else {
                 mZoomer.forceFinished(true)
                 if (hitTest(e.x, e.y, mZoomFocalPoint)) {
-                    mZoomer.startZoom(AUTO_ZOOM_AMOUNT)
+                    animateZoom(WorldConfig.AUTO_ZOOM_AMOUNT)
                 }
                 ViewCompat.postInvalidateOnAnimation(view)
             }
@@ -194,6 +195,10 @@ class GestureHelper(val view: View, val content: RectF, val viewport: RectF, pri
             return true
         }
     })
+
+    fun animateZoom(endZoom: Float) {
+        mZoomer.startZoom(endZoom)
+    }
 
     fun computeScroll() {
         var needsInvalidate = false
@@ -350,8 +355,7 @@ class GestureHelper(val view: View, val content: RectF, val viewport: RectF, pri
             val newHeight: Float = spanRatio * viewport.height()
 
 
-            val worldSizeRestriction = WorldConfig.MIN_CELL_SIZE * WorldConfig.MIN_WORLD_SIZE
-            if (newWidth < worldSizeRestriction || newHeight < worldSizeRestriction) return true
+            if (newWidth < model.getWorldSizeRestriction() || newHeight < model.getWorldSizeRestriction()) return true
 
             val focusX: Float = detector.focusX
             val focusY: Float = detector.focusY
@@ -406,7 +410,7 @@ class GestureHelper(val view: View, val content: RectF, val viewport: RectF, pri
         newY = max(content.top + curHeight, min(newY, content.bottom))
 
         viewport.set(newX, newY - curHeight, newX + curWidth, newY)
-        zoomRatio = viewport.width() / content.width()
+        model.zoom = viewport.width() / content.width()
     }
 
     /**
@@ -434,14 +438,6 @@ class GestureHelper(val view: View, val content: RectF, val viewport: RectF, pri
         viewport.top = max(content.top, viewport.top)
         viewport.bottom = max(nextUp(viewport.top), min(content.bottom, viewport.bottom))
         viewport.right = max(nextUp(viewport.left), min(content.right, viewport.right))
-        zoomRatio = viewport.width() / content.width()
-    }
-
-    fun getZoom(): Float {
-        return zoomRatio
-    }
-
-    fun setZoom(zoom: Float) {
-        zoomRatio = zoom
+        model.zoom = viewport.width() / content.width()
     }
 }
