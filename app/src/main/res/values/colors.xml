@@ -7,7 +7,7 @@
     <color name="black_overlay">#66000000</color>
 
     <color name="world_background">#000000</color>
-    <color name="grid_line">#b219bc</color>
-    <color name="cell_color">#223344</color>
+    <color name="grid_line">#0027ff</color>
+    <color name="cell_color">#023160</color>
     <color name="help">#5544ff00</color>
 </resources>
