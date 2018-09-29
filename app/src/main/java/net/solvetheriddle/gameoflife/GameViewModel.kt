@@ -6,7 +6,7 @@ import java.util.*
 
 class GameViewModel : ViewModel() {
 
-    val gameLiveData = Game()
+    val gameLiveData = Game(Game.GameSettings())
 
     /**
      * Initializes Game with a world that fits in the given View
@@ -32,7 +32,7 @@ class GameViewModel : ViewModel() {
     }
 
     fun cycleSpeed() {
-        gameLiveData.cycleSpeed()
+        gameLiveData.settings.cycleSpeed()
     }
 
     fun cycleZoom() {
