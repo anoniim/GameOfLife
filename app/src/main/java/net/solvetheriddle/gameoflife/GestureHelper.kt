@@ -355,7 +355,7 @@ class GestureHelper(
             val newHeight: Float = spanRatio * viewport.height()
 
 
-            if (newWidth < model.getWorldSizeRestriction() || newHeight < model.getWorldSizeRestriction()) return true
+            if (newWidth < model.worldSizeRestriction || newHeight < model.worldSizeRestriction) return true
 
             val focusX: Float = detector.focusX
             val focusY: Float = detector.focusY

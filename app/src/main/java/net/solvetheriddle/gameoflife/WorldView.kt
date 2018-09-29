@@ -10,13 +10,15 @@ import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
 import androidx.core.content.ContextCompat
-import java.util.*
 import kotlin.math.floor
 
 
 class WorldView(context: Context, attrs: AttributeSet) : View(context, attrs) {
 
-    private val model = WorldViewModel()
+    private val model = WorldViewModel({ _, _, _ ->
+        invalidate()
+        requestLayout()
+    })
 
     // The current destination rectangle (in pixel coordinates) into which the chart data should be drawn.
     private val content: RectF = RectF()
@@ -32,12 +34,6 @@ class WorldView(context: Context, attrs: AttributeSet) : View(context, attrs) {
     private var mAxisXLinesBuffer = floatArrayOf()
     private var mAxisYLinesBuffer = floatArrayOf()
 
-    init {
-        model.registerStateObserver(Observer { _, _ ->
-            invalidate()
-            requestLayout()
-        })
-    }
 
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
         super.onSizeChanged(w, h, oldw, oldh)
@@ -55,7 +51,7 @@ class WorldView(context: Context, attrs: AttributeSet) : View(context, attrs) {
 
         if (model.gridVisible) drawGrid(canvas)
 
-        drawState(canvas, model.getState())
+        drawState(canvas, model.state)
 
         // Clips the next few drawing operations to the content area
         val clipRestoreCount = canvas.save()
@@ -87,12 +83,12 @@ class WorldView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         } else throw IllegalArgumentException("Invalid zoom")
     }
 
-    fun setState(state: Array<IntArray>) {
-        model.setState(state)
+    fun setState(state: WorldState) {
+        model.state = state
     }
 
-    fun getState(): Array<IntArray> {
-        return model.getState()
+    fun getState(): WorldState {
+        return model.state
     }
 
     fun getDisplaySize(): Point {
@@ -109,11 +105,11 @@ class WorldView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         return this > 0
     }
 
-    private fun drawState(canvas: Canvas, state: Array<IntArray>) {
-        val firstVisibleIndexY = (viewport.top / model.getCellSize()).toInt()
-        val lastVisibleIndexY = (viewport.bottom / model.getCellSize()).toInt() - 1
-        val firstVisibleIndexX = (viewport.left / model.getCellSize()).toInt()
-        val lastVisibleIndexX = (viewport.right / model.getCellSize()).toInt() - 1
+    private fun drawState(canvas: Canvas, state: WorldState) {
+        val firstVisibleIndexY = (viewport.top / model.cellSize).toInt()
+        val lastVisibleIndexY = (viewport.bottom / model.cellSize).toInt() - 1
+        val firstVisibleIndexX = (viewport.left / model.cellSize).toInt()
+        val lastVisibleIndexX = (viewport.right / model.cellSize).toInt() - 1
         for (y in firstVisibleIndexY..lastVisibleIndexY) {
             for (x in firstVisibleIndexX..lastVisibleIndexX) {
                 if (state[x][y].isAlive()) {
@@ -124,13 +120,13 @@ class WorldView(context: Context, attrs: AttributeSet) : View(context, attrs) {
     }
 
     private fun drawCell(canvas: Canvas, x: Int, y: Int) {
-        var cellLeft = x * model.getCellSize() - viewport.left
+        var cellLeft = x * model.cellSize - viewport.left
         if (cellLeft < content.left) cellLeft = content.left
-        var cellTop = y * model.getCellSize() - viewport.top
+        var cellTop = y * model.cellSize - viewport.top
         if (cellTop < content.top) cellTop = content.top
-        var cellRight = (x * model.getCellSize() - viewport.left + model.getCellSize()) / model.zoom
+        var cellRight = (x * model.cellSize - viewport.left + model.cellSize) / model.zoom
         if (cellRight > content.right) cellRight = content.right
-        var cellBottom = (y * model.getCellSize() - viewport.top + model.getCellSize()) / model.zoom
+        var cellBottom = (y * model.cellSize - viewport.top + model.cellSize) / model.zoom
         if (cellBottom > content.bottom) cellBottom = content.bottom
         canvas.drawRect(RectF(
                 cellLeft / model.zoom,
@@ -142,10 +138,10 @@ class WorldView(context: Context, attrs: AttributeSet) : View(context, attrs) {
 
     private fun drawGrid(canvas: Canvas) {
 
-        val newNumCellsX = Math.nextUp(viewport.width() / model.getCellSize()).toInt() + 1
-        val newNumCellsY = Math.nextUp(viewport.height() / model.getCellSize()).toInt() + 1
-        val mXStopsBuffer = FloatArray(newNumCellsX) { x -> x * model.getCellSize().toFloat() }
-        val mYStopsBuffer = FloatArray(newNumCellsY) { y -> y * model.getCellSize().toFloat() }
+        val newNumCellsX = Math.nextUp(viewport.width() / model.cellSize).toInt() + 1
+        val newNumCellsY = Math.nextUp(viewport.height() / model.cellSize).toInt() + 1
+        val mXStopsBuffer = FloatArray(newNumCellsX) { x -> x * model.cellSize.toFloat() }
+        val mYStopsBuffer = FloatArray(newNumCellsY) { y -> y * model.cellSize.toFloat() }
 
         // Avoid unnecessary allocations during drawing. Re-use allocated
         // arrays and only reallocate if the number of stops grows.
@@ -164,13 +160,13 @@ class WorldView(context: Context, attrs: AttributeSet) : View(context, attrs) {
 
         // Compute positions
         var i = 0
-        val offsetX = model.getCellSize() - viewport.left.rem(model.getCellSize())
+        val offsetX = model.cellSize - viewport.left.rem(model.cellSize)
         while (i < mXStopsBuffer.size) {
             mAxisXPositionsBuffer[i] = (mXStopsBuffer[i] + offsetX) / model.zoom
             i++
         }
         i = 0
-        val offsetY = model.getCellSize() - viewport.top.rem(model.getCellSize())
+        val offsetY = model.cellSize - viewport.top.rem(model.cellSize)
         while (i < mYStopsBuffer.size) {
             mAxisYPositionsBuffer[i] = (mYStopsBuffer[i] + offsetY) / model.zoom
             i++
