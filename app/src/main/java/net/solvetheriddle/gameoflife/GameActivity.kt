@@ -46,7 +46,7 @@ class GameActivity : AppCompatActivity(), GestureHelper.ClickListener {
                 world_view.setState(it)
             }
         })
-        viewModel.gameLiveData.gameSpeed.observe(this, Observer {
+        viewModel.gameLiveData.settings.gameSpeed.observe(this, Observer {
             runOnUiThread {
                 Toast.makeText(this, "$it x", Toast.LENGTH_SHORT).show()
             }

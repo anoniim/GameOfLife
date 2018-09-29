@@ -4,9 +4,7 @@ import android.os.SystemClock
 import android.util.Log
 import androidx.lifecycle.LiveData
 
-class Game(minVerticalCellCount: Int = DEFAULT_SIZE,
-           minHorizontalCellCount: Int = DEFAULT_SIZE,
-           val gameSpeed: GameSpeed = GameSpeed())
+class Game(val settings: GameSettings)
     : LiveData<Array<IntArray>>() {
 
     private val tag = this::class.java.simpleName
@@ -30,7 +28,7 @@ class Game(minVerticalCellCount: Int = DEFAULT_SIZE,
             Log.d(tag, "State = ${state.name}")
         }
 
-    var worldState: Array<IntArray> = emptyWorldState(minVerticalCellCount, minHorizontalCellCount)
+    var worldState: Array<IntArray> = emptyWorldState(settings.getVerticalCellCount(), settings.getHorizontalCellCount())
         set(newState) {
             field = newState
             worldStateObserver?.onNextTurn(newState)
@@ -45,16 +43,12 @@ class Game(minVerticalCellCount: Int = DEFAULT_SIZE,
         gameState = GameState.RUNNING
         while (gameState == GameState.RUNNING) {
             nextTurn()
-            SystemClock.sleep(gameSpeed.millis.toLong())
+            SystemClock.sleep(settings.gameSpeed.millis.toLong())
         }
     }
 
     private fun pause() {
         gameState = GameState.PAUSED
-    }
-
-    fun cycleSpeed() {
-        gameSpeed.cycleUp()
     }
 
     override fun onActive() {
@@ -147,5 +141,23 @@ class Game(minVerticalCellCount: Int = DEFAULT_SIZE,
         if (worldState.size < MIN_SIZE || worldState[0].size < MIN_SIZE)
             throw IllegalStateException("Size must be at least $MIN_SIZE, is "
                     + if (worldState.isEmpty()) "0" else "[${worldState.size}, ${worldState[0].size}]")
+    }
+
+    class GameSettings(var minVerticalCellCount: Int = DEFAULT_SIZE,
+                       var minHorizontalCellCount: Int = DEFAULT_SIZE,
+                       val gameSpeed: GameSpeed = GameSpeed()) {
+
+
+        fun cycleSpeed() {
+            gameSpeed.cycleUp()
+        }
+
+        fun getVerticalCellCount(): Int {
+            return minVerticalCellCount
+        }
+
+        fun getHorizontalCellCount(): Int {
+            return minHorizontalCellCount
+        }
     }
 }
