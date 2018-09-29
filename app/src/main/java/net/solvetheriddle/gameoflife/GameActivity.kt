@@ -12,7 +12,6 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import kotlinx.android.synthetic.main.activity_game.*
 import kotlinx.android.synthetic.main.activity_game.view.*
-import kotlin.concurrent.thread
 
 /**
  * An example full-screen activity that shows and hides the system UI (i.e.
@@ -46,7 +45,7 @@ class GameActivity : AppCompatActivity(), GestureHelper.ClickListener {
                 world_view.setState(it)
             }
         })
-        viewModel.gameLiveData.settings.gameSpeed.observe(this, Observer {
+        viewModel.speedObservable.observe(this, Observer {
             runOnUiThread {
                 Toast.makeText(this, "$it x", Toast.LENGTH_SHORT).show()
             }
@@ -98,7 +97,7 @@ class GameActivity : AppCompatActivity(), GestureHelper.ClickListener {
 
     private fun initGameControls(viewModel: GameViewModel) {
         controls_view.play_button.setOnClickListener {
-            thread { viewModel.togglePlay() }
+            viewModel.togglePlay()
         }
         controls_view.play_button.setOnLongClickListener {
             controls_view.toggleExtraControlsVisibility()

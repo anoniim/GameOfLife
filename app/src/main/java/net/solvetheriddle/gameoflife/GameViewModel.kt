@@ -2,7 +2,7 @@ package net.solvetheriddle.gameoflife
 
 import android.graphics.Point
 import androidx.lifecycle.ViewModel
-import java.util.*
+import kotlin.concurrent.thread
 
 class GameViewModel : ViewModel() {
 
@@ -11,24 +11,16 @@ class GameViewModel : ViewModel() {
     /**
      * Initializes Game with a world that fits in the given View
      */
-    fun initGame(displaySize: Point): Array<IntArray> {
-        val initState = getRandomState(
-                displaySize.x / WorldConfig.MIN_CELL_SIZE,
-                displaySize.y / WorldConfig.MIN_CELL_SIZE)
+    fun initGame(displaySize: Point): WorldState {
+        val initState = WorldFactory.random(
+                displaySize.x / WorldConfig.CELL_SIZE,
+                displaySize.y / WorldConfig.CELL_SIZE)
         gameLiveData.worldState = initState
         return initState
     }
 
-    private fun getRandomState(verticalCellCount: Int, horizontalCellCount: Int): Array<IntArray> {
-        return Array(verticalCellCount) {
-            IntArray(horizontalCellCount) {
-                Random().nextInt(2)
-            }
-        }
-    }
-
     fun togglePlay() {
-        gameLiveData.togglePlay()
+        thread { gameLiveData.togglePlay() }
     }
 
     fun cycleSpeed() {
@@ -46,4 +38,6 @@ class GameViewModel : ViewModel() {
     fun onDoubleTap() {
 
     }
+
+    val speedObservable = gameLiveData.settings.gameSpeed
 }

@@ -2,24 +2,22 @@ package net.solvetheriddle.gameoflife
 
 import android.os.SystemClock
 import android.util.Log
+import androidx.annotation.WorkerThread
 import androidx.lifecycle.LiveData
+import net.solvetheriddle.gameoflife.WorldConfig.Companion.WORLD_SIZE_DEFAULT
+import net.solvetheriddle.gameoflife.WorldConfig.Companion.WORLD_SIZE_MIN
+import java.util.*
 
-class Game(val settings: GameSettings)
-    : LiveData<Array<IntArray>>() {
+class Game(val settings: GameSettings) : LiveData<WorldState>() {
 
     private val tag = this::class.java.simpleName
-
-    companion object {
-        private const val MIN_SIZE = 5
-        private const val DEFAULT_SIZE = 500
-    }
 
     enum class GameState {
         PAUSED, RUNNING
     }
 
     interface WorldStateObserver {
-        fun onNextTurn(worldState: Array<IntArray>)
+        fun onNextTurn(worldState: WorldState)
     }
 
     private var gameState = GameState.PAUSED
@@ -28,17 +26,21 @@ class Game(val settings: GameSettings)
             Log.d(tag, "State = ${state.name}")
         }
 
-    var worldState: Array<IntArray> = emptyWorldState(settings.getVerticalCellCount(), settings.getHorizontalCellCount())
+    var worldState: WorldState = WorldFactory.empty(settings.getColCount(), settings.getRowCount())
         set(newState) {
             field = newState
             worldStateObserver?.onNextTurn(newState)
+            nextState = newState
         }
     private var worldStateObserver: Game.WorldStateObserver? = null
+    private lateinit var nextState: WorldState
 
+    @WorkerThread
     fun togglePlay() {
         if (gameState == GameState.RUNNING) pause() else run()
     }
 
+    @WorkerThread
     private fun run() {
         gameState = GameState.RUNNING
         while (gameState == GameState.RUNNING) {
@@ -53,8 +55,7 @@ class Game(val settings: GameSettings)
 
     override fun onActive() {
         worldStateObserver = object : WorldStateObserver {
-            override fun onNextTurn(worldState: Array<IntArray>) {
-                Log.d(tag, "Next turn posted")
+            override fun onNextTurn(worldState: WorldState) {
                 postValue(worldState)
             }
         }
@@ -65,10 +66,9 @@ class Game(val settings: GameSettings)
     }
 
     private fun nextTurn() {
-//        assertWorldInitialized()
         assertWorldValid(worldState)
 
-        val nextState = emptyWorldState(worldState.size, worldState[0].size)
+        nextState = WorldFactory.empty(worldState.size, worldState[0].size)
 
         for (i in worldState.indices) {
             for (j in 0 until worldState[0].size) {
@@ -81,10 +81,10 @@ class Game(val settings: GameSettings)
                 }
             }
         }
-        worldState = nextState
+        worldState = nextState.copyOf()
     }
 
-    private fun getNumOfNeighbours(state: Array<IntArray>, i: Int, j: Int): Int {
+    private fun getNumOfNeighbours(state: WorldState, i: Int, j: Int): Int {
         val upperNeighbor = i - 1
         val lowerNeighbor = i + 1
         val leftNeighbor = j - 1
@@ -126,25 +126,14 @@ class Game(val settings: GameSettings)
         return cell > 0
     }
 
-    private fun emptyWorldState(minVerticalCellCount: Int, minHorizontalCellCount: Int): Array<IntArray> {
-        return Array(minVerticalCellCount) {
-            IntArray(minHorizontalCellCount)
-        }
-    }
-
-//    private fun assertWorldInitialized() {
-//        if (!this::worldState.isInitialized)
-//            throw IllegalStateException("World has not been initialized")
-//    }
-
-    private fun assertWorldValid(worldState: Array<IntArray>) {
-        if (worldState.size < MIN_SIZE || worldState[0].size < MIN_SIZE)
-            throw IllegalStateException("Size must be at least $MIN_SIZE, is "
+    private fun assertWorldValid(worldState: WorldState) {
+        if (worldState.size < WORLD_SIZE_MIN || worldState[0].size < WORLD_SIZE_MIN)
+            throw IllegalStateException("Size must be at least $WORLD_SIZE_MIN, is "
                     + if (worldState.isEmpty()) "0" else "[${worldState.size}, ${worldState[0].size}]")
     }
 
-    class GameSettings(var minVerticalCellCount: Int = DEFAULT_SIZE,
-                       var minHorizontalCellCount: Int = DEFAULT_SIZE,
+    class GameSettings(private var colCount: Int = WORLD_SIZE_DEFAULT,
+                       private var rowCount: Int = WORLD_SIZE_DEFAULT,
                        val gameSpeed: GameSpeed = GameSpeed()) {
 
 
@@ -152,12 +141,29 @@ class Game(val settings: GameSettings)
             gameSpeed.cycleUp()
         }
 
-        fun getVerticalCellCount(): Int {
-            return minVerticalCellCount
+        fun getColCount(): Int {
+            return colCount
         }
 
-        fun getHorizontalCellCount(): Int {
-            return minHorizontalCellCount
+        fun getRowCount(): Int {
+            return rowCount
+        }
+    }
+}
+
+typealias WorldState = Array<IntArray>
+
+class WorldFactory {
+    companion object {
+
+        fun empty(colCount: Int = 0, rowCount: Int = 0) = Array(colCount) { IntArray(rowCount) }
+
+        fun random(colCount: Int, rowCount: Int): WorldState {
+            return Array(colCount) { _ ->
+                IntArray(rowCount) {
+                    Random().nextInt(2)
+                }
+            }
         }
     }
 }

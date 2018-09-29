@@ -1,39 +1,23 @@
 package net.solvetheriddle.gameoflife
 
-import java.util.*
+import kotlin.properties.Delegates
+import kotlin.reflect.KProperty
+
+typealias StateObserver = (property: KProperty<*>, oldValue: WorldState, newValue: WorldState) -> Unit
 
 /**
  * Model holding data about the current state of the [WorldView]
  */
 class WorldViewModel(
-        internal var gridVisible: Boolean = false,
-        internal var zoom: Float = 1F) {
+        stateObserver: StateObserver,
+        internal var gridVisible: Boolean = WorldConfig.GRID_VISIBLE_DEFAULT,
+        internal var zoom: Float = WorldConfig.ZOOM_DEFAULT) {
 
+    var state: WorldState by Delegates.observable(WorldFactory.empty(), stateObserver)
 
-    private val stateObservable = StateObservable()
-    fun registerStateObserver(observer: Observer) = stateObservable.addObserver(observer)
-    class StateObservable : Observable() {
-        internal var state: Array<IntArray> = arrayOf(IntArray(0))
-            set(value) {
-                field = value
-                setChanged()
-                notifyObservers()
-            }
-    }
+    val cellSize = WorldConfig.CELL_SIZE
 
-    fun setState(state: Array<IntArray>) {
-        stateObservable.state = state
-    }
-    fun getState(): Array<IntArray> {
-        return stateObservable.state
-    }
+    val cellSizeScaled = cellSize / zoom
 
-
-    fun getCellSize() = WorldConfig.MIN_CELL_SIZE
-
-    fun getCellSizeScaled() = getCellSize() / zoom
-
-    fun getWorldSizeRestriction(): Float {
-        return (getCellSize() * WorldConfig.MIN_WORLD_SIZE).toFloat()
-    }
+    val worldSizeRestriction = (cellSize * WorldConfig.WORLD_SIZE_MIN).toFloat()
 }
