@@ -1,4 +1,4 @@
-package net.solvetheriddle.gameoflife
+package net.solvetheriddle.gameoflife.view
 
 import android.content.Context
 import android.os.SystemClock
