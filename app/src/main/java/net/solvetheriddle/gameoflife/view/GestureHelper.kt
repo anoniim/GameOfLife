@@ -191,7 +191,7 @@ class GestureHelper(
         }
 
         override fun onFling(e1: MotionEvent, e2: MotionEvent, velocityX: Float, velocityY: Float): Boolean {
-            // FIXME both dimensions originally reversed
+            // FIXME both dimensions originally reversed (not only X)
             fling((-velocityX).toInt(), (velocityY).toInt())
             return true
         }
