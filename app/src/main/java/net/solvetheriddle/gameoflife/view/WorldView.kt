@@ -1,4 +1,4 @@
-package net.solvetheriddle.gameoflife
+package net.solvetheriddle.gameoflife.view
 
 import android.annotation.SuppressLint
 import android.content.Context
@@ -10,7 +10,10 @@ import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
 import androidx.core.content.ContextCompat
+import net.solvetheriddle.gameoflife.R
+import net.solvetheriddle.gameoflife.WorldState
 import kotlin.math.floor
+import kotlin.math.min
 
 
 class WorldView(context: Context, attrs: AttributeSet) : View(context, attrs) {
@@ -85,6 +88,7 @@ class WorldView(context: Context, attrs: AttributeSet) : View(context, attrs) {
 
     fun setState(state: WorldState) {
         model.state = state
+//        gestureHelper.constrainViewport()
     }
 
     fun getState(): WorldState {
@@ -106,10 +110,13 @@ class WorldView(context: Context, attrs: AttributeSet) : View(context, attrs) {
     }
 
     private fun drawState(canvas: Canvas, state: WorldState) {
+        if(state.isEmpty()) return
+
+        // Draw only visible part of the World
         val firstVisibleIndexY = (viewport.top / model.cellSize).toInt()
-        val lastVisibleIndexY = (viewport.bottom / model.cellSize).toInt() - 1
+        val lastVisibleIndexY = min((viewport.bottom / model.cellSize).toInt(), state[0].size) -1
         val firstVisibleIndexX = (viewport.left / model.cellSize).toInt()
-        val lastVisibleIndexX = (viewport.right / model.cellSize).toInt() - 1
+        val lastVisibleIndexX = min((viewport.right / model.cellSize).toInt(), state.size)- 1
         for (y in firstVisibleIndexY..lastVisibleIndexY) {
             for (x in firstVisibleIndexX..lastVisibleIndexX) {
                 if (state[x][y].isAlive()) {
@@ -120,6 +127,7 @@ class WorldView(context: Context, attrs: AttributeSet) : View(context, attrs) {
     }
 
     private fun drawCell(canvas: Canvas, x: Int, y: Int) {
+        // Do not draw out of the screen (overlapping parts)
         var cellLeft = x * model.cellSize - viewport.left
         if (cellLeft < content.left) cellLeft = content.left
         var cellTop = y * model.cellSize - viewport.top
@@ -128,6 +136,7 @@ class WorldView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         if (cellRight > content.right) cellRight = content.right
         var cellBottom = (y * model.cellSize - viewport.top + model.cellSize) / model.zoom
         if (cellBottom > content.bottom) cellBottom = content.bottom
+
         canvas.drawRect(RectF(
                 cellLeft / model.zoom,
                 cellTop / model.zoom,

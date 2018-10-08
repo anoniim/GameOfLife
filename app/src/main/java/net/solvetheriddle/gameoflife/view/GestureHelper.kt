@@ -1,4 +1,4 @@
-package net.solvetheriddle.gameoflife
+package net.solvetheriddle.gameoflife.view
 
 import android.graphics.Canvas
 import android.graphics.Point
@@ -191,7 +191,8 @@ class GestureHelper(
         }
 
         override fun onFling(e1: MotionEvent, e2: MotionEvent, velocityX: Float, velocityY: Float): Boolean {
-            fling((-velocityX).toInt(), (-velocityY).toInt())
+            // FIXME both dimensions originally reversed
+            fling((-velocityX).toInt(), (velocityY).toInt())
             return true
         }
     })
@@ -314,6 +315,7 @@ class GestureHelper(
     }
 
     private fun fling(velocityX: Int, velocityY: Int) {
+        // FIXME fling only works when on the edge of the World (might have something to do with the type of content values - Float, was Int)
         releaseEdgeEffects()
         // Flings use math in pixels (as opposed to math based on the viewport).
         computeScrollSurfaceSize(mSurfaceSizeBuffer)
@@ -418,6 +420,7 @@ class GestureHelper(
      * [.content.right], [.content.top] and [.content.bottom].
      */
     fun constrainViewport() {
+        // Ensure inside content extremes
         val subMinX = viewport.left - content.left
         if (subMinX < 0) {
             viewport.right -= subMinX

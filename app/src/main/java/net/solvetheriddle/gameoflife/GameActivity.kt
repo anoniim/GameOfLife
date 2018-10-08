@@ -2,7 +2,6 @@ package net.solvetheriddle.gameoflife
 
 import android.os.Bundle
 import android.os.Handler
-import android.util.Log
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewTreeObserver
@@ -12,6 +11,7 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import kotlinx.android.synthetic.main.activity_game.*
 import kotlinx.android.synthetic.main.activity_game.view.*
+import net.solvetheriddle.gameoflife.view.GestureHelper
 
 /**
  * An example full-screen activity that shows and hides the system UI (i.e.
@@ -40,12 +40,12 @@ class GameActivity : AppCompatActivity(), GestureHelper.ClickListener {
         initGameControls(viewModel)
 
         // World state observer
-        viewModel.gameLiveData.observe(this, Observer {
+        viewModel.worldState.observe(this, Observer {
             runOnUiThread {
                 world_view.setState(it)
             }
         })
-        viewModel.speedObservable.observe(this, Observer {
+        viewModel.gameSpeed.observe(this, Observer {
             runOnUiThread {
                 Toast.makeText(this, "$it x", Toast.LENGTH_SHORT).show()
             }
@@ -59,7 +59,6 @@ class GameActivity : AppCompatActivity(), GestureHelper.ClickListener {
 
     override fun onSingleTap(e: MotionEvent) {
 //        viewModel.onSingleTap()
-        Log.wtf("marcel", "single")
         toggleSystemUiVisibility(false)
     }
 
@@ -89,7 +88,7 @@ class GameActivity : AppCompatActivity(), GestureHelper.ClickListener {
         world_view.showGrid(gameMode == GameMode.EDIT)
         world_view.viewTreeObserver.addOnGlobalLayoutListener(object : ViewTreeObserver.OnGlobalLayoutListener {
             override fun onGlobalLayout() {
-                world_view.setState(viewModel.initGame(world_view.getDisplaySize()))
+                viewModel.initGame(world_view.getDisplaySize())
                 world_view.viewTreeObserver.removeOnGlobalLayoutListener(this)
             }
         })

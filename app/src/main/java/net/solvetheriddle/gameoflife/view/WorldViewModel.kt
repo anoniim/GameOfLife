@@ -1,15 +1,15 @@
-package net.solvetheriddle.gameoflife
+package net.solvetheriddle.gameoflife.view
 
+import net.solvetheriddle.gameoflife.WorldFactory
+import net.solvetheriddle.gameoflife.WorldState
+import net.solvetheriddle.gameoflife.WorldStateObserver
 import kotlin.properties.Delegates
-import kotlin.reflect.KProperty
-
-typealias StateObserver = (property: KProperty<*>, oldValue: WorldState, newValue: WorldState) -> Unit
 
 /**
  * Model holding data about the current state of the [WorldView]
  */
 class WorldViewModel(
-        stateObserver: StateObserver,
+        stateObserver: WorldStateObserver,
         internal var gridVisible: Boolean = WorldConfig.GRID_VISIBLE_DEFAULT,
         internal var zoom: Float = WorldConfig.ZOOM_DEFAULT) {
 
