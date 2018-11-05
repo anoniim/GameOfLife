@@ -1,6 +1,6 @@
 package net.solvetheriddle.gameoflife
 
-import net.solvetheriddle.gameoflife.view.WorldConfig.Companion.WORLD_SIZE_DEFAULT
+import net.solvetheriddle.gameoflife.view.WorldViewConfig.Companion.WORLD_SIZE_DEFAULT
 import java.util.*
 
 class Game {
@@ -20,7 +20,7 @@ class Game {
     }
 
     fun new(settings: Settings) {
-        engine = GameEngine(settings) { _, _, state: WorldState -> notifyListeners(state) }
+        engine = GameEngine(settings = settings) { _, _, state: WorldState -> notifyListeners(state) }
     }
 
     fun togglePlay() {
