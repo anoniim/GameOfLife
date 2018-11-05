@@ -10,14 +10,14 @@ import kotlin.properties.Delegates
  */
 class WorldViewModel(
         stateObserver: WorldStateObserver,
-        internal var gridVisible: Boolean = WorldConfig.GRID_VISIBLE_DEFAULT,
-        internal var zoom: Float = WorldConfig.ZOOM_DEFAULT) {
+        internal var gridVisible: Boolean = WorldViewConfig.GRID_VISIBLE_DEFAULT,
+        internal var zoom: Float = WorldViewConfig.ZOOM_DEFAULT) {
 
     var state: WorldState by Delegates.observable(WorldFactory.empty(), stateObserver)
 
-    val cellSize = WorldConfig.CELL_SIZE
+    val cellSize = WorldViewConfig.CELL_SIZE
 
     val cellSizeScaled = cellSize / zoom
 
-    val worldSizeRestriction = (cellSize * WorldConfig.WORLD_SIZE_MIN).toFloat()
+    val worldSizeRestriction = (cellSize * WorldViewConfig.WORLD_SIZE_MIN).toFloat()
 }

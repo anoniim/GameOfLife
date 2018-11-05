@@ -4,7 +4,7 @@ import android.graphics.Point
 import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import net.solvetheriddle.gameoflife.view.WorldConfig
+import net.solvetheriddle.gameoflife.view.WorldViewConfig
 import java.util.*
 import kotlin.concurrent.thread
 
@@ -21,8 +21,8 @@ class GameViewModel : ViewModel(), Observer {
      */
     fun initGame(displaySize: Point) {
         game.new(Game.Settings(
-                displaySize.x / WorldConfig.CELL_SIZE,
-                displaySize.y / WorldConfig.CELL_SIZE))
+                displaySize.x / WorldViewConfig.CELL_SIZE,
+                displaySize.y / WorldViewConfig.CELL_SIZE))
 
         game.worldStateObserver = { worldState.postValue(it) }
         game.getSettings().gameSpeed.addObserver(this)
