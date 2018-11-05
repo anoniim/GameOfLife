@@ -19,12 +19,12 @@ import net.solvetheriddle.gameoflife.view.GestureHelper
  */
 class GameActivity : AppCompatActivity(), GestureHelper.ClickListener {
 
-    enum class GameMode {
+    enum class ViewMode {
         PLAY,
         EDIT
     }
 
-    private var gameMode: GameMode = GameConfig.DEFAULT_GAME_MODE
+    private var mViewMode: ViewMode = GameConfig.DEFAULT_GAME_MODE
 
     private val viewModel: GameViewModel
         get() {
@@ -64,28 +64,28 @@ class GameActivity : AppCompatActivity(), GestureHelper.ClickListener {
 
     override fun onDoubleTap(e: MotionEvent) {
         // Toggle Game Mode
-        when (gameMode) {
-            GameMode.PLAY -> editMode()
-            GameMode.EDIT -> playMode()
+        when (mViewMode) {
+            ViewMode.PLAY -> editMode()
+            ViewMode.EDIT -> playMode()
         }
     }
 
     private fun playMode() {
-        gameMode = GameMode.PLAY
+        mViewMode = ViewMode.PLAY
         showUi(false)
         world_view.showGrid(false)
         Toast.makeText(this, "PLAY", Toast.LENGTH_SHORT).show()
     }
 
     private fun editMode() {
-        gameMode = GameMode.EDIT
+        mViewMode = ViewMode.EDIT
         showUi(true)
         world_view.showGrid(true)
         Toast.makeText(this, "EDIT", Toast.LENGTH_SHORT).show()
     }
 
     private fun initWorldView(viewModel: GameViewModel) {
-        world_view.showGrid(gameMode == GameMode.EDIT)
+        world_view.showGrid(mViewMode == ViewMode.EDIT)
         world_view.viewTreeObserver.addOnGlobalLayoutListener(object : ViewTreeObserver.OnGlobalLayoutListener {
             override fun onGlobalLayout() {
                 viewModel.initGame(world_view.getDisplaySize())

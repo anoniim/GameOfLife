@@ -18,7 +18,7 @@ import kotlin.math.min
 
 class WorldView(context: Context, attrs: AttributeSet) : View(context, attrs) {
 
-    private val model = WorldViewModel({ _, _, _ ->
+    private val model = WorldViewModel(stateObserver = { _, _, _ ->
         invalidate()
         requestLayout()
     })
@@ -79,7 +79,7 @@ class WorldView(context: Context, attrs: AttributeSet) : View(context, attrs) {
     }
 
     fun setZoom(zoom: Float) {
-        if (zoom in 0..1) {
+        if (zoom in 0.0..1.0) {
             gestureHelper.animateZoom(zoom)
             invalidate()
             requestLayout()

@@ -1,6 +1,6 @@
 package net.solvetheriddle.gameoflife.view
 
-interface WorldConfig {
+interface WorldViewConfig {
     companion object {
         const val CELL_SIZE = 5 // Cell square size in pixels
         const val WORLD_SIZE_MIN = 10 // Number of cells on the smaller dimension
