@@ -11,7 +11,6 @@ import android.view.MotionEvent
 import android.view.View
 import androidx.core.content.ContextCompat
 import net.solvetheriddle.gameoflife.R
-import net.solvetheriddle.gameoflife.WorldState
 import kotlin.math.floor
 import kotlin.math.min
 
@@ -86,12 +85,12 @@ class WorldView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         } else throw IllegalArgumentException("Invalid zoom")
     }
 
-    fun setState(state: WorldState) {
+    fun setState(state: net.solvetheriddle.gameoflife.engine.WorldState) {
         model.state = state
 //        gestureHelper.constrainViewport()
     }
 
-    fun getState(): WorldState {
+    fun getState(): net.solvetheriddle.gameoflife.engine.WorldState {
         return model.state
     }
 
@@ -109,7 +108,7 @@ class WorldView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         return this > 0
     }
 
-    private fun drawState(canvas: Canvas, state: WorldState) {
+    private fun drawState(canvas: Canvas, state: net.solvetheriddle.gameoflife.engine.WorldState) {
         if(state.isEmpty()) return
 
         // Draw only visible part of the World

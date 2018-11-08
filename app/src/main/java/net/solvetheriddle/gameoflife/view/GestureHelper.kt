@@ -143,7 +143,7 @@ class GestureHelper(
             } else {
                 mZoomer.forceFinished(true)
                 if (hitTest(e.x, e.y, mZoomFocalPoint)) {
-                    animateZoom(WorldViewConfig.AUTO_ZOOM_AMOUNT)
+                    animateZoom(net.solvetheriddle.gameoflife.engine.WorldViewConfig.AUTO_ZOOM_AMOUNT)
                 }
                 ViewCompat.postInvalidateOnAnimation(view)
             }

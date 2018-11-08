@@ -11,7 +11,10 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import kotlinx.android.synthetic.main.activity_game.*
 import kotlinx.android.synthetic.main.activity_game.view.*
+import mu.KotlinLogging
 import net.solvetheriddle.gameoflife.view.GestureHelper
+
+private val logger = KotlinLogging.logger {}
 
 /**
  * An example full-screen activity that shows and hides the system UI (i.e.
@@ -47,6 +50,7 @@ class GameActivity : AppCompatActivity(), GestureHelper.ClickListener {
         })
         viewModel.gameSpeed.observe(this, Observer {
             runOnUiThread {
+                logger.info { "$it x" }
                 Toast.makeText(this, "$it x", Toast.LENGTH_SHORT).show()
             }
         })

@@ -1,4 +1,4 @@
-package net.solvetheriddle.gameoflife
+package net.solvetheriddle.gameoflife.engine
 
 import java.util.*
 
