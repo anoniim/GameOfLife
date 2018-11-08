@@ -41,14 +41,9 @@ class Zoomer(context: Context) {
     private var mFinished = true
 
     /**
-     * The current zoom value; computed by [.computeZoom].
+     * The current zoom value; computed by [computeZoom].
      */
-    /**
-     * Returns the current zoom level.
-     *
-     * @see android.widget.Scroller.getCurrX
-     */
-    var currZoom: Float = 0.toFloat()
+    var currZoom: Float = net.solvetheriddle.gameoflife.engine.WorldViewConfig.ZOOM_DEFAULT
         private set
 
     /**
@@ -59,7 +54,7 @@ class Zoomer(context: Context) {
     /**
      * The destination zoom factor.
      */
-    private var mEndZoom: Float = 0f
+    private var mEndZoom: Float = net.solvetheriddle.gameoflife.engine.WorldViewConfig.ZOOM_DEFAULT
 
     init {
         mInterpolator = DecelerateInterpolator()

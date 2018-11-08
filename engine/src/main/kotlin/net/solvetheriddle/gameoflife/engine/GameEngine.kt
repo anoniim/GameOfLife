@@ -1,10 +1,9 @@
-package net.solvetheriddle.gameoflife
+package net.solvetheriddle.gameoflife.engine
 
-import android.os.SystemClock
-import android.util.Log
-import androidx.annotation.WorkerThread
-import net.solvetheriddle.gameoflife.view.WorldViewConfig
+import mu.KotlinLogging
 import kotlin.properties.Delegates
+
+private val logger = KotlinLogging.logger {}
 
 class GameEngine(
         private val nextTurnStrategy: NextTurnStrategy = NextTurnStrategy.classic(),
@@ -12,28 +11,24 @@ class GameEngine(
         worldStateObserver: WorldStateObserver
 ) {
 
-    private val tag = this::class.java.simpleName
-
     private var worldState: WorldState
             by Delegates.observable(settings.getInitState(), worldStateObserver)
 
     private var gameState = Game.GameState.PAUSED
         set(state) {
             field = state
-            Log.d(tag, "Game State = ${state.name}")
+            logger.info { "Game State = ${state.name}" }
         }
 
-    @WorkerThread
     fun togglePlay() {
         if (gameState == Game.GameState.RUNNING) pause() else run()
     }
 
-    @WorkerThread
     private fun run() {
         gameState = Game.GameState.RUNNING
         while (gameState == Game.GameState.RUNNING) {
             nextTurn()
-            SystemClock.sleep(settings.gameSpeed.millis.toLong())
+            Thread.sleep(settings.gameSpeed.millis.toLong())
         }
     }
 
@@ -79,9 +74,9 @@ class NextTurnStrategy(internal val liveness: Liveness,
 
         fun classic(): NextTurnStrategy {
             return NextTurnStrategy(
-                    liveness = ::positiveIsAlive,
-                    neighborhood = ::infiniteEdges,
-                    rules = ::conwaysRules
+                    liveness = Companion::positiveIsAlive,
+                    neighborhood = Companion::infiniteEdges,
+                    rules = Companion::conwaysRules
             )
         }
 
