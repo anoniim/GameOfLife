@@ -4,6 +4,7 @@ import android.content.Context
 import android.os.SystemClock
 import android.view.animation.DecelerateInterpolator
 import android.view.animation.Interpolator
+import net.solvetheriddle.gameoflife.engine.WorldViewConfig
 
 /*
  * Copyright 2013 The Android Open Source Project
@@ -43,7 +44,7 @@ class Zoomer(context: Context) {
     /**
      * The current zoom value; computed by [computeZoom].
      */
-    var currZoom: Float = net.solvetheriddle.gameoflife.engine.WorldViewConfig.ZOOM_DEFAULT
+    var currZoom: Float = WorldViewConfig.ZOOM_DEFAULT
         private set
 
     /**
@@ -54,7 +55,7 @@ class Zoomer(context: Context) {
     /**
      * The destination zoom factor.
      */
-    private var mEndZoom: Float = net.solvetheriddle.gameoflife.engine.WorldViewConfig.ZOOM_DEFAULT
+    private var mEndZoom: Float = WorldViewConfig.ZOOM_DEFAULT
 
     init {
         mInterpolator = DecelerateInterpolator()
@@ -93,7 +94,7 @@ class Zoomer(context: Context) {
         mEndZoom = endZoom
 
         mFinished = false
-        currZoom = 1f
+//        currZoom = 1f
     }
 
     /**
