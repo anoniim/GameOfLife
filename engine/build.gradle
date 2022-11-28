@@ -5,7 +5,7 @@ dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
 
-    compile "io.github.microutils:kotlin-logging:1.6.20"
+    implementation "io.github.microutils:kotlin-logging:1.6.20"
 }
 
 sourceCompatibility = "8"
